@@ -10,6 +10,7 @@ class ThumbPlan(models.Model):
     name = models.CharField(max_length=50, unique=True)
 
     use_source_img = models.BooleanField(default=False)
+    use_expiring_links = models.BooleanField(default=False)
     thumb_rules = models.ManyToManyField(
         ThumbRule
     )
