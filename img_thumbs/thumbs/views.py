@@ -68,7 +68,7 @@ class GetImageTempLink(APIView):
         except TypeError:
             raise ValidationError
 
-        if image.user != request.user:
+        if image.user != request.user or not request.user.thumb_user.plan.use_expiring_links:
             raise PermissionDenied
 
         if not image.file.name:
@@ -84,7 +84,7 @@ class GetImageTempLink(APIView):
         relative_url = link.generate_link()
         uri = request.build_absolute_uri(relative_url)
 
-        return Response(uri, status=status.HTTP_200_OK)
+        return Response(uri, status=status.HTTP_201_CREATED)
 
 class ParseImageTempLink(APIView):
     def get(self, request, slug):
