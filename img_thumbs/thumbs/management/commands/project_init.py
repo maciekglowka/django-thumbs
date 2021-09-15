@@ -1,13 +1,28 @@
+import os
+
+from django.conf import settings
 from django.core.management import call_command
 from django.core.management.base import BaseCommand
+from django.core.management.utils import get_random_secret_key
 
 from thumbs.models import ThumbPlan, ThumbRule
 
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
+        #start db
         call_command('makemigrations')
         call_command('migrate')
+
+        #create secret key
+        path = os.path.join(settings.BASE_DIR, '.env')
+
+        with open(path, 'a+') as f:
+            f.seek(0)
+            if not [line for line in f if line.startswith('SECRET_KEY')]:
+                f.write(f'\nSECRET_KEY={get_random_secret_key()}')
+                print('created SECRET_KEY variable')
+
 
         #create rules for 200px and 400px
         rules = {}
