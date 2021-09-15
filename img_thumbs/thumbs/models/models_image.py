@@ -28,6 +28,9 @@ class UserImage(models.Model):
     parent = models.ForeignKey('UserImage', related_name='thumbs', on_delete=models.CASCADE, default=None, null=True)
     thumb_rule = models.ForeignKey(ThumbRule, null=True, default=None, on_delete=models.PROTECT)
 
+    def __str__(self):
+        return f'Image {self.pk}'
+
     def save(self, *args, **kwargs):
         if self.pk != None or not hasattr(self.user, 'thumb_user'):
             super().save(*args, **kwargs)
@@ -98,6 +101,9 @@ class UserImage(models.Model):
 class ImageTempLink(models.Model):
     image = models.ForeignKey(UserImage, on_delete=models.CASCADE)
     expiration = models.DateTimeField()
+
+    def __str__(self):
+        return f'Link for image {self.image.pk}'
 
     def generate_link(self):
         signer = signing.Signer()

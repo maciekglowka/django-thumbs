@@ -7,3 +7,6 @@ from thumbs.models import ThumbPlan
 class ThumbUser(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='thumb_user')
     plan = models.ForeignKey(ThumbPlan, on_delete=models.PROTECT)
+
+    def __str__(self):
+        return f'Thumb User profile for {self.user.username}'
