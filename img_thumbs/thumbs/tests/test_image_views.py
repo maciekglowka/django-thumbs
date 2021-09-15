@@ -1,12 +1,17 @@
-import pathlib
 import json
+import pathlib
+
 from django.contrib.auth.models import User
-from django.db.models import Q
 from django.core.files import File
+from django.db.models import Q
 from rest_framework import status
 from rest_framework.test import APITestCase
-from thumbs.models import UserImage, ThumbUser, ThumbPlan, ThumbRule
-from .utils import delete_test_files, create_test_rules, TEST_IMAGES, NON_IMAGE_FILE
+
+from thumbs.models import ThumbPlan, ThumbUser, UserImage
+
+from .utils import (NON_IMAGE_FILE, TEST_IMAGES, create_test_rules,
+                    delete_test_files)
+
 
 class TestImageUploadView(APITestCase):
     def setUp(self):
@@ -162,6 +167,39 @@ class TestImageUploadView(APITestCase):
 
         self.assertEqual(status.HTTP_400_BAD_REQUEST, response.status_code)
 
+
+    def test_image_upload_nofile(self):
+        plan = ThumbPlan.objects.create(
+            name = 'SINGLE_PLAN',
+            use_source_img=False
+        )
+
+        plan.thumb_rules.set([self.rules[0]])
+
+        ThumbUser.objects.create(
+            user = self.user,
+            plan = plan
+        )
+
+        self.client.force_authenticate(self.user)
+        response = self.client.post(
+            '/thumbs/upload_img/',
+            {}, format='multipart'
+        )
+
+        self.assertEqual(status.HTTP_400_BAD_REQUEST, response.status_code)
+
+    def test_image_upload_no_thumb_user_model(self):
+        self.client.force_authenticate(self.user)
+
+        with open(TEST_IMAGES[0], 'rb') as f:
+            response = self.client.post(
+                '/thumbs/upload_img/',
+                {'file':f}, format='multipart'
+            )
+
+        self.assertEqual(status.HTTP_400_BAD_REQUEST, response.status_code)
+
 class TestImageListView(APITestCase):
     def setUp(self):
         self.rules = create_test_rules()
@@ -205,7 +243,7 @@ class TestImageListView(APITestCase):
     def tearDown(self):
         delete_test_files(self.image_ids_to_delete)
 
-    def test_image_upload_multiple_thumbs(self):
+    def test_image_list_multiple_thumbs(self):
         for user in self.users:
             self.client.force_authenticate(user)
 
@@ -224,4 +262,9 @@ class TestImageListView(APITestCase):
 
             for img in all_images:
                 self.assertIn(img.file.name, json.dumps(response.data))
-        
+
+    def test_image_list_no_login(self):
+        for user in self.users:
+            response = self.client.get('/thumbs/list_img/')
+
+            self.assertEqual(status.HTTP_403_FORBIDDEN, response.status_code)

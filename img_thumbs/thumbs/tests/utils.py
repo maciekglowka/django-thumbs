@@ -1,6 +1,7 @@
 import os
 import pathlib
-from thumbs.models import UserImage, ThumbRule
+
+from thumbs.models import ThumbRule, UserImage
 
 TEST_DATA_DIR = os.path.join(pathlib.Path(__file__).parent, 'test_images')
 TEST_IMAGES = [

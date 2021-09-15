@@ -1,6 +1,8 @@
 from django.contrib import admin
 
-from thumbs.models import ThumbRule, ThumbPlan, ThumbUser, UserImage, ImageTempLink
+from thumbs.models import (ImageTempLink, ThumbPlan, ThumbRule, ThumbUser,
+                           UserImage)
+
 
 # Register your models here.
 @admin.register(ThumbRule)

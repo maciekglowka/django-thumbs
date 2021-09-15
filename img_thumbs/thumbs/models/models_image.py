@@ -1,14 +1,17 @@
-from io import BytesIO
 import os
 import uuid
+from io import BytesIO
 from pathlib import Path
-from django.db import models
+
 from django.contrib.auth.models import User
-from django.core.files.base import ContentFile
 from django.core import signing
+from django.core.files.base import ContentFile
+from django.db import models
 from django.urls import reverse
 from PIL import Image
+
 from thumbs.models import ThumbRule
+
 
 def get_unique_name(filename):
     ext = filename.split('.')[-1]
@@ -26,7 +29,7 @@ class UserImage(models.Model):
     thumb_rule = models.ForeignKey(ThumbRule, null=True, default=None, on_delete=models.PROTECT)
 
     def save(self, *args, **kwargs):
-        if self.pk != None:
+        if self.pk != None or not hasattr(self.user, 'thumb_user'):
             super().save(*args, **kwargs)
             return
         
@@ -41,7 +44,6 @@ class UserImage(models.Model):
 
 
     def create_thumbs(self):
-        ##use fetch related
         plan = self.user.thumb_user.plan
         rules = plan.thumb_rules.all()
 

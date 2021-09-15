@@ -1,4 +1,5 @@
 from django.urls import path
+
 from thumbs import views
 
 app_name = 'thumbs'

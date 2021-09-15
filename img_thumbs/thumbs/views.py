@@ -1,16 +1,20 @@
 import datetime
-from django.db.models import Q
+
+from django.conf import settings
 from django.core import signing
+from django.db.models import Q
 from django.http.response import HttpResponseRedirect
 from django.utils import timezone
-from rest_framework.response import Response
-from rest_framework import status
+from rest_framework import permissions, status
+from rest_framework.exceptions import (NotFound, PermissionDenied,
+                                       ValidationError)
 from rest_framework.generics import CreateAPIView
+from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework import permissions
-from rest_framework.exceptions import PermissionDenied, ValidationError, NotFound
+
+from thumbs.models import ImageTempLink, UserImage
 from thumbs.serializers import UserImageCreateSerializer
-from thumbs.models import UserImage, ImageTempLink
+
 
 # Create your views here.
 class ImageUploadView(CreateAPIView):
@@ -65,6 +69,8 @@ class GetImageTempLink(APIView):
 
         try:
             expiration = int(self.request.query_params.get('exp', None))
+            if expiration < settings.TEMP_LINK_MIN_SECONDS or expiration > settings.TEMP_LINK_MAX_SECONDS:
+                raise ValidationError
         except TypeError:
             raise ValidationError
 
@@ -92,7 +98,7 @@ class ParseImageTempLink(APIView):
         try:
             signer = signing.Signer()
             pk = int(signer.unsign(slug))
-        except (ValueError, TypeError):
+        except (ValueError, TypeError, signing.BadSignature):
             raise ValidationError
 
         try:
