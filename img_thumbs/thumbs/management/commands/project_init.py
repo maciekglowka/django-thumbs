@@ -13,6 +13,7 @@ class Command(BaseCommand):
         #start db
         call_command('makemigrations')
         call_command('migrate')
+        call_command('collectstatic', '--noinput')
 
         #create secret key
         path = os.path.join(settings.BASE_DIR, '.env')
