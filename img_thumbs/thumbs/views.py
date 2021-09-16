@@ -75,16 +75,17 @@ class GetImageTempLink(APIView):
     '''
     def get(self, request):       
         try:
-            img_id = self.request.query_params.get('img', None)
+            img_id = int(self.request.query_params.get('img', None))
+            print(img_id)
             image = UserImage.objects.get(pk=img_id)
-        except UserImage.DoesNotExist:
+        except (TypeError, ValueError, UserImage.DoesNotExist):
             raise NotFound
 
         try:
             expiration = int(self.request.query_params.get('exp', None))
             if expiration < settings.TEMP_LINK_MIN_SECONDS or expiration > settings.TEMP_LINK_MAX_SECONDS:
                 raise ValidationError
-        except TypeError:
+        except (TypeError, ValueError):
             raise ValidationError
 
         if image.user != request.user or not request.user.thumb_user.plan.use_expiring_links:
