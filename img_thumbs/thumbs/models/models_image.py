@@ -47,6 +47,9 @@ class UserImage(models.Model):
 
 
     def create_thumbs(self):
+        '''
+        Creates thumbs for the image, based on owners plan.
+        '''
         plan = self.user.thumb_user.plan
         rules = plan.thumb_rules.all()
 
@@ -58,6 +61,9 @@ class UserImage(models.Model):
             )
 
     def create_thumb_file(self):
+        '''
+        Creates a resized image, based on a rule provieded.
+        '''
         if self.file.name:
             return
 
@@ -81,6 +87,10 @@ class UserImage(models.Model):
         )
 
     def get_all_urls(self):
+        '''
+        Creates a dict of urls to the image, incl. all thumbnails.
+        Keys are thumbnail numeric height values or 'original' for the original image, if present
+        '''
         urls = {}
 
         for thumb in self.thumbs.all().prefetch_related('thumb_rule'):
@@ -106,6 +116,9 @@ class ImageTempLink(models.Model):
         return f'Link for image {self.image.pk}'
 
     def generate_link(self):
+        '''
+        Generates a relative url, with an encoded slug pointing to self
+        '''
         signer = signing.Signer()
         sign = signer.sign(self.pk)
 

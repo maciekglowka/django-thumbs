@@ -18,6 +18,11 @@ from thumbs.serializers import UserImageCreateSerializer
 
 # Create your views here.
 class ImageUploadView(CreateAPIView):
+    '''
+    Allows to upload image by a registered user.
+    Thumbnails are created according to users's plan.
+    Image urls (incl. thumbs) are returned in a response.
+    '''
     serializer_class = UserImageCreateSerializer
     permission_classes = [permissions.IsAuthenticated]
 
@@ -42,6 +47,9 @@ class ImageUploadView(CreateAPIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class ImageListView(APIView):
+    '''
+    Lists all images owned by request user
+    '''
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request):
@@ -60,6 +68,11 @@ class ImageListView(APIView):
         return Response(img_list, status=status.HTTP_200_OK)
 
 class GetImageTempLink(APIView):
+    '''
+    Generates an ImageTempLink objects and returns an encoded url
+    pointing to the object.
+    Necessary query params: img (Image object id) and exp (expiration time in seconds)
+    '''
     def get(self, request):       
         try:
             img_id = self.request.query_params.get('img', None)
@@ -93,6 +106,10 @@ class GetImageTempLink(APIView):
         return Response(uri, status=status.HTTP_201_CREATED)
 
 class ParseImageTempLink(APIView):
+    '''
+    Decodes a slug value, pointing to ImageTempLink objects.
+    If valid, returns a redirecto to image file url.
+    '''
     def get(self, request, slug):
 
         try:

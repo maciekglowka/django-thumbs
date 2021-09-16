@@ -11,6 +11,7 @@ TEST_IMAGES = [
 NON_IMAGE_FILE = os.path.join(TEST_DATA_DIR, 'file.txt')
 
 def delete_test_files(ids):
+    '''Delete image files on tearDown'''
     for id in ids:
         img = UserImage.objects.get(pk=id)
         if img.file:
